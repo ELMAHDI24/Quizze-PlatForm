@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>QuizMaster — Documentation des Interfaces UI</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; max-width: 800px; margin: 40px auto; line-height: 1.6; color: #333; }
+    h1 { color: #2D2D2D; border-bottom: 3px solid #4DA091; padding-bottom: 8px; }
+    h2 { color: #4DA091; margin-top: 32px; }
+    h3 { color: #D98466; }
+    .screenshot { border: 2px dashed #ccc; background: #f9f9f9; padding: 40px; text-align: center; color: #888; margin: 16px 0; min-height: 200px; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+    th { background: #F9F7F2; }
+    .tech { background: #eef7f5; padding: 12px; border-left: 4px solid #4DA091; margin: 12px 0; }
+    .removed { text-decoration: line-through; color: #999; }
+  </style>
+</head>
+<body>
+
+<h1>QuizMaster — Documentation des Interfaces Visuelles</h1>
+<p><strong>Projet :</strong> Plateforme de Quiz Éducatif (Next.js)<br>
+<strong>Date :</strong> Juin 2026<br>
+<strong>Destinataire :</strong> Salah Eddine (intégration backend)</p>
+
+<h2>1. Stack Technologique</h2>
+<div class="tech">
+  <table>
+    <tr><th>Technologie</th><th>Usage</th></tr>
+    <tr><td>Shadcn/ui</td><td>Boutons, Cartes, Modales, Formulaires</td></tr>
+    <tr><td>Radix Switch</td><td>Bascule Enseignant/Étudiant</td></tr>
+    <tr><td>React Hook Form + Zod</td><td>Tous les formulaires</td></tr>
+    <tr><td>TipTap (éditeur riche)</td><td>Description et énoncés des questions</td></tr>
+    <tr><td>Tailwind grayscale</td><td>Quiz Terminé/Expiré inactifs</td></tr>
+  </table>
+</div>
+
+<h2>2. Page de Connexion — /auth</h2>
+<div class="screenshot">[CAPTURE D'ÉCRAN — Page de connexion]</div>
+<ul>
+  <li>Switch Radix Enseignant / Étudiant</li>
+  <li>React Hook Form + validation Zod</li>
+</ul>
+
+<h2>3. Création de Quiz — /teacher/quiz/new</h2>
+<div class="screenshot">[CAPTURE D'ÉCRAN — Formulaire de création]</div>
+<ul>
+  <li><span class="removed">Code d'accès</span> → <strong>Affectation nominative des étudiants</strong></li>
+  <li>Durée totale (minutes), Date d'expiration</li>
+  <li>Système de notation : Standard / Canadien (RG-11)</li>
+  <li>Génération en masse de N questions vides</li>
+  <li>RG-12 : validation bloque la publication si questions incomplètes</li>
+  <li>Modale d'affectation des étudiants (Quiz_Assignment)</li>
+</ul>
+
+<h2>4. Espace Étudiant — /student</h2>
+<div class="screenshot">[CAPTURE D'ÉCRAN — Tableau de bord étudiant]</div>
+<ul>
+  <li><span class="removed">Saisie de code d'accès</span> → <strong>Cartes des quiz assignés</strong> (RG-05)</li>
+  <li>L'étudiant sélectionne directement un quiz depuis son tableau de bord</li>
+</ul>
+
+<h2>5. Passage du Quiz — /student/quiz/[id]</h2>
+<div class="screenshot">[CAPTURE D'ÉCRAN — Interface de passage]</div>
+<ul>
+  <li>Timer (compte à rebours) — RG-09 clôture automatique</li>
+  <li>Questions une par une — RG-08 pas de bouton Précédent</li>
+  <li>Sauvegarde à la volée (Student_Response)</li>
+  <li>RG-07 : reprise à la dernière question non validée</li>
+</ul>
+
+<h2>6. Tableau de Bord Enseignant — /teacher</h2>
+<div class="screenshot">[CAPTURE D'ÉCRAN — Dashboard enseignant]</div>
+<ul>
+  <li>Nombre d'étudiants affectés par quiz (plus de code)</li>
+  <li>Quiz Terminé/Expiré en grayscale (RG-10)</li>
+</ul>
+
+<h2>7. Modèle de Données (résumé)</h2>
+<table>
+  <tr><th>Table</th><th>Changements</th></tr>
+  <tr><td>Quiz</td><td><span class="removed">access_code</span> → duration_minutes, expires_at, grading_system</td></tr>
+  <tr><td>Question</td><td>+ points, penalty_points</td></tr>
+  <tr><td>Quiz_Assignment</td><td>Nouvelle table de liaison</td></tr>
+  <tr><td>Quiz_Session</td><td>Remplace Result</td></tr>
+  <tr><td>Student_Response</td><td>Nouvelle table (réponses à la volée)</td></tr>
+</table>
+
+</body>
+</html>
