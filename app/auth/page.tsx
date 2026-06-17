@@ -4,10 +4,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Mail, Lock, ArrowRight } from "lucide-react"
+import { Mail, Lock, ArrowRight, ArrowLeft } from "lucide-react"
 import { loginSchema, type LoginFormValues } from "@/lib/schemas"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
 import {
   Form,
   FormControl,
@@ -26,16 +24,12 @@ export default function AuthPage() {
     defaultValues: {
       email: "",
       password: "",
-      isStudent: false,
       rememberSession: false,
     },
   })
 
-  const isStudent = form.watch("isStudent")
-
-  const onSubmit = (data: LoginFormValues) => {
-    const destination = data.isStudent ? "/student" : "/teacher"
-    router.push(destination)
+  const onSubmit = () => {
+    router.push("/teacher")
   }
 
   return (
@@ -48,6 +42,14 @@ export default function AuthPage() {
         className="pointer-events-none absolute -bottom-32 -right-32 h-[500px] w-[500px] rounded-full opacity-40 blur-3xl"
         style={{ background: "radial-gradient(circle, #A8D5CC 0%, transparent 70%)" }}
       />
+
+      <Link
+        href="/"
+        aria-label="Retour à la page principale"
+        className="absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-xl border border-[#707070]/20 bg-white shadow-sm transition-all hover:border-[#4DA091]/40 hover:shadow-md lg:right-8 lg:top-8"
+      >
+        <ArrowLeft className="h-5 w-5 text-[#4DA091]" />
+      </Link>
 
       <div className="relative z-10 flex min-h-screen flex-col lg:flex-row">
         <div className="flex flex-1 flex-col justify-between px-8 py-10 lg:px-16 lg:py-14">
@@ -107,30 +109,6 @@ export default function AuthPage() {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {/* Role toggle — Radix Switch (Enseignant / Étudiant) */}
-                <div className="mb-2 flex items-center justify-center gap-3 rounded-2xl bg-white/60 px-4 py-3 shadow-sm">
-                  <Label
-                    htmlFor="role-switch"
-                    className={`text-sm font-medium transition-colors ${!isStudent ? "text-[#2D2D2D]" : "text-[#707070]"}`}
-                  >
-                    Enseignant
-                  </Label>
-                  <Switch
-                    id="role-switch"
-                    checked={isStudent}
-                    onCheckedChange={(checked) =>
-                      form.setValue("isStudent", checked)
-                    }
-                    className="data-[state=checked]:bg-[#4DA091]"
-                  />
-                  <Label
-                    htmlFor="role-switch"
-                    className={`text-sm font-medium transition-colors ${isStudent ? "text-[#2D2D2D]" : "text-[#707070]"}`}
-                  >
-                    Étudiant
-                  </Label>
-                </div>
-
                 <FormField
                   control={form.control}
                   name="email"

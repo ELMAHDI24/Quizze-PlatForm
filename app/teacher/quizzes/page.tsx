@@ -1,147 +1,139 @@
 "use client"
 
 import Link from "next/link"
-import { PlusCircle, Search, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardHeader } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
-import type { QuizStatus } from "@/lib/types"
-import { isQuizInactive } from "@/lib/quiz-utils"
+import { Playfair_Display } from "next/font/google"
+import {
+  BarChart3,
+  Calendar,
+  Clock,
+  Pencil,
+  Trash2,
+  Trophy,
+  Users,
+} from "lucide-react"
+import {
+  getQuizCardClassName,
+  isQuizInactive,
+  MOCK_QUIZZES,
+  countAssignedStudents,
+  resolveQuizStatus,
+} from "@/lib/quiz-utils"
 
-const quizzes: { id: number; title: string; assigned: number; date: string; status: QuizStatus; duration: number }[] = [
-  { id: 1, title: "Mathématiques - Chapitre 4", assigned: 24, date: "12 Oct 2024", status: "Actif", duration: 30 },
-  { id: 2, title: "Histoire - La Révolution", assigned: 31, date: "05 Oct 2024", status: "Terminé", duration: 45 },
-  { id: 3, title: "Physique - Mécanique", assigned: 0, date: "À venir", status: "Brouillon", duration: 60 },
-  { id: 4, title: "Français - Conjugaison", assigned: 18, date: "01 Nov 2024", status: "Actif", duration: 20 },
-  { id: 5, title: "SVT - Génétique", assigned: 12, date: "15 Nov 2024", status: "Expiré", duration: 40 },
-]
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["700"],
+})
+
+function formatExpiry(date: Date) {
+  return date.toLocaleDateString("fr-FR")
+}
 
 export default function TeacherQuizzesPage() {
-  return (
-    <div className="p-8 max-w-6xl mx-auto w-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Gestion des Quiz</h1>
-          <p className="text-slate-500 mt-1">Consultez, modifiez ou supprimez vos évaluations.</p>
-        </div>
-        <Link href="/teacher/quiz/new">
-          <Button size="lg" className="gap-2 shadow-md">
-            <PlusCircle className="h-5 w-5" />
-            Nouveau Quiz
-          </Button>
-        </Link>
-      </div>
+  const quizzes = MOCK_QUIZZES.filter((q) => q.status !== "Brouillon").map((q) => ({
+    ...q,
+    status: resolveQuizStatus(q),
+  }))
 
-      <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
-        <CardHeader className="border-b border-slate-100 bg-slate-50/30 pb-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full sm:max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input placeholder="Rechercher un quiz..." className="pl-9 bg-white" />
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Select defaultValue="tous">
-                <SelectTrigger className="w-[180px] bg-white">
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tous">Tous les statuts</SelectItem>
-                  <SelectItem value="actif">Actif</SelectItem>
-                  <SelectItem value="brouillon">Brouillon</SelectItem>
-                  <SelectItem value="termine">Terminé</SelectItem>
-                  <SelectItem value="expire">Expiré</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+  return (
+    <div className="flex-1 bg-[#F9F7F2] px-6 py-8 md:px-10 md:py-10">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+        <header className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <h1 className={`${playfair.className} text-3xl font-bold text-[#2D2D2D] md:text-4xl`}>
+              Gestion des quiz
+            </h1>
+            <p className="mt-1 text-sm text-[#707070]">
+              Les quiz expirés s&apos;affichent automatiquement en grisé (inactif).
+            </p>
           </div>
-        </CardHeader>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                <TableHead className="font-semibold text-slate-700">Titre du Quiz</TableHead>
-                <TableHead className="font-semibold text-slate-700">Étudiants affectés</TableHead>
-                <TableHead className="font-semibold text-slate-700">Durée</TableHead>
-                <TableHead className="font-semibold text-slate-700">Date de création</TableHead>
-                <TableHead className="font-semibold text-slate-700">Statut</TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {quizzes.map((quiz) => (
-                <TableRow
-                  key={quiz.id}
-                  className={`hover:bg-slate-50/50 transition-colors ${isQuizInactive(quiz.status) ? "grayscale opacity-70" : ""}`}
-                >
-                  <TableCell className="font-medium text-slate-900">{quiz.title}</TableCell>
-                  <TableCell className="text-slate-600">{quiz.assigned} étudiant(s)</TableCell>
-                  <TableCell className="text-slate-600">{quiz.duration} min</TableCell>
-                  <TableCell className="text-slate-600">{quiz.date}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={quiz.status === "Actif" ? "default" : quiz.status === "Terminé" || quiz.status === "Expiré" ? "secondary" : "outline"}
-                      className={quiz.status === "Actif" ? "bg-green-100 text-green-800 hover:bg-green-100" : quiz.status === "Expiré" ? "bg-orange-100 text-orange-800" : ""}
+          <Link
+            href="/teacher/quiz/new"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#C46A42] px-5 py-3 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+          >
+            + Créer un quiz
+          </Link>
+        </header>
+
+        <div className="space-y-4">
+          {quizzes.map((quiz) => {
+            const inactive = isQuizInactive(quiz.status)
+            const assignedCount = countAssignedStudents(quiz.id)
+
+            return (
+              <article
+                key={quiz.id}
+                className={getQuizCardClassName(
+                  quiz.status,
+                  "rounded-3xl border border-[#E8E4DC] bg-white px-5 py-5 shadow-sm md:px-6"
+                )}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-bold tracking-wide ${
+                      quiz.status === "Actif"
+                        ? "bg-[#E2EDE7] text-[#4DA091]"
+                        : "bg-[#E8E4DC] text-[#707070]"
+                    }`}
+                  >
+                    {quiz.status.toUpperCase()}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/teacher/quiz/${quiz.id}/results`}
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg border border-[#E8E4DC] text-[#707070] transition-colors hover:border-[#C46A42]/40 hover:text-[#C46A42] ${
+                        inactive ? "pointer-events-none opacity-40" : ""
+                      }`}
+                      aria-label="Voir les résultats"
                     >
-                      {quiz.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0" disabled={isQuizInactive(quiz.status)}>
-                          <span className="sr-only">Ouvrir le menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/teacher/quiz/${quiz.id}/results`} className="cursor-pointer">
-                            <Eye className="mr-2 h-4 w-4 text-slate-500" />
-                            Voir les résultats
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4 text-slate-500" />
-                          Modifier
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600 focus:text-red-600">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Supprimer
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                      <Trophy className="h-4 w-4" />
+                    </Link>
+                    <button
+                      type="button"
+                      disabled={inactive}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E8E4DC] text-[#707070] transition-colors hover:border-[#C46A42]/40 hover:text-[#C46A42] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Modifier le quiz"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={inactive}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E8E4DC] text-[#707070] transition-colors hover:border-red-300 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Supprimer le quiz"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <h2 className={`${playfair.className} mt-4 text-xl font-bold text-[#2D2D2D]`}>
+                  {quiz.title}
+                </h2>
+
+                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#707070]">
+                  <span className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-[#B3A89A]" />
+                    {quiz.durationMinutes} minutes
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-[#B3A89A]" />
+                    Expire : {formatExpiry(quiz.expiresAt)}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-[#B3A89A]" />
+                    {assignedCount} étudiants affectés
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-[#B3A89A]" />
+                    {quiz.gradingSystem === "canadien" ? "Notation canadienne" : "Notation standard"}
+                  </span>
+                </div>
+              </article>
+            )
+          })}
         </div>
-        <div className="p-4 border-t border-slate-100">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#" />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#" isActive>1</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">2</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      </Card>
+      </div>
     </div>
   )
 }

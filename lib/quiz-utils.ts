@@ -71,47 +71,109 @@ export function getResumeQuestionIndex(
 }
 
 export const MOCK_STUDENTS = [
-  { id: "s1", name: "Sophie Martin", email: "sophie.martin@ecole.fr" },
-  { id: "s2", name: "Lucas Bernard", email: "lucas.bernard@ecole.fr" },
-  { id: "s3", name: "Emma Dubois", email: "emma.dubois@ecole.fr" },
-  { id: "s4", name: "Thomas Petit", email: "thomas.petit@ecole.fr" },
-  { id: "s5", name: "Léa Moreau", email: "lea.moreau@ecole.fr" },
-  { id: "s6", name: "Hugo Laurent", email: "hugo.laurent@ecole.fr" },
-  { id: "s7", name: "Chloé Simon", email: "chloe.simon@ecole.fr" },
-  { id: "s8", name: "Nathan Michel", email: "nathan.michel@ecole.fr" },
+  { id: "s1", name: "Yasmine El Amrani", email: "yasmine.elamrani@univ.ma" },
+  { id: "s2", name: "Mehdi Bouzid", email: "mehdi.bouzid@univ.ma" },
+  { id: "s3", name: "Salma Tazi", email: "salma.tazi@univ.ma" },
+  { id: "s4", name: "Karim Idrissi", email: "karim.idrissi@univ.ma" },
+  { id: "s5", name: "Nadia Berrada", email: "nadia.berrada@univ.ma" },
+  { id: "s6", name: "Omar Saadi", email: "omar.saadi@univ.ma" },
+  { id: "s7", name: "Chloé Simon", email: "chloe.simon@univ.ma" },
+  { id: "s8", name: "Nathan Michel", email: "nathan.michel@univ.ma" },
 ] as const
 
 export const CURRENT_STUDENT_ID = "s1"
+
+export const CURRENT_STUDENT = {
+  id: CURRENT_STUDENT_ID,
+  name: "Yasmine El Amrani",
+  email: "yasmine.elamrani@etablissement.ma",
+  initials: "ÉT",
+}
+
+export const MOCK_STUDENT_SCORES: Record<string, { score: number; maxScore: number }> = {
+  "2": { score: 14.5, maxScore: 20 },
+}
+
+export const TEACHER_QUIZ_ASSIGNED_COUNTS: Record<string, number> = {
+  "1": 28,
+  "2": 28,
+  "4": 22,
+}
+
+export interface QuizResultRow {
+  id: string
+  name: string
+  email: string
+  date: string
+  score: number
+  total: number
+}
+
+export type QuizResultStatus = "valide" | "rattrapage" | "non_valide"
+
+export function getQuizResultStatus(score: number): QuizResultStatus {
+  if (score >= 10) return "valide"
+  if (score >= 8) return "rattrapage"
+  return "non_valide"
+}
+
+export function getQuizResultStatusLabel(status: QuizResultStatus) {
+  if (status === "valide") return "VALIDÉ"
+  if (status === "rattrapage") return "RATTRAPAGE"
+  return "NON VALIDÉ"
+}
+
+export function getQuizResultStatusExportLabel(score: number) {
+  const status = getQuizResultStatus(score)
+  if (status === "valide") return "Validé"
+  if (status === "rattrapage") return "Rattrapage"
+  return "Non validé"
+}
+
+export const MOCK_QUIZ_RESULTS: Record<string, QuizResultRow[]> = {
+  "1": [
+    { id: "r1", name: "Yasmine El Amrani", email: "yasmine.elamrani@univ.ma", date: "14 juin — 10:23", score: 18, total: 20 },
+    { id: "r2", name: "Mehdi Bouzid", email: "mehdi.bouzid@univ.ma", date: "14 juin — 10:45", score: 14, total: 20 },
+    { id: "r3", name: "Salma Tazi", email: "salma.tazi@univ.ma", date: "14 juin — 11:02", score: 9, total: 20 },
+    { id: "r4", name: "Karim Idrissi", email: "karim.idrissi@univ.ma", date: "14 juin — 11:30", score: 16, total: 20 },
+    { id: "r5", name: "Nadia Berrada", email: "nadia.berrada@univ.ma", date: "15 juin — 09:15", score: 19.5, total: 20 },
+    { id: "r6", name: "Omar Saadi", email: "omar.saadi@univ.ma", date: "15 juin — 09:48", score: 11, total: 20 },
+  ],
+}
+
+export function countAssignedStudents(quizId: string) {
+  return TEACHER_QUIZ_ASSIGNED_COUNTS[quizId] ?? MOCK_ASSIGNMENTS.filter((a) => a.quizId === quizId).length
+}
 
 export const MOCK_ASSIGNMENTS = [
   { id: "a1", quizId: "1", userId: "s1" },
   { id: "a2", quizId: "1", userId: "s2" },
   { id: "a3", quizId: "2", userId: "s1" },
-  { id: "a4", quizId: "3", userId: "s1" },
+  { id: "a5", quizId: "4", userId: "s1" },
 ]
 
 export const MOCK_QUIZZES: Quiz[] = [
   {
     id: "1",
-    title: "Évaluation de Mathématiques",
-    description: "<p>Équations et dérivées — Chapitre 4</p>",
+    title: "Algorithmique — Structures de données",
+    description: "<p>Listes, piles et files — Évaluation de mi-semestre</p>",
     teacherId: "teacher-1",
     createdAt: new Date("2024-10-12"),
     status: "Actif",
-    durationMinutes: 30,
-    expiresAt: new Date("2026-12-31"),
+    durationMinutes: 45,
+    expiresAt: new Date("2026-06-20"),
     gradingSystem: "standard",
     questions: [
       {
         id: "q1",
-        text: "Quel est le résultat de l'équation <strong>2x + 5 = 15</strong> ?",
-        points: 1,
+        text: "Quelle est la complexité moyenne d'une recherche dans un arbre binaire de recherche équilibré ?",
+        points: 2,
         penaltyPoints: 0.25,
         choices: [
-          { id: "c1", text: "x = 2", isCorrect: false },
-          { id: "c2", text: "x = 5", isCorrect: true },
-          { id: "c3", text: "x = 10", isCorrect: false },
-          { id: "c4", text: "x = 20", isCorrect: false },
+          { id: "c1", text: "O(1)", isCorrect: false },
+          { id: "c2", text: "O(log n)", isCorrect: true },
+          { id: "c3", text: "O(n)", isCorrect: false },
+          { id: "c4", text: "O(n log n)", isCorrect: false },
         ],
       },
       {
@@ -166,8 +228,8 @@ export const MOCK_QUIZZES: Quiz[] = [
   },
   {
     id: "2",
-    title: "Histoire — La Révolution",
-    description: "<p>Évaluation sur la Révolution française</p>",
+    title: "Bases de données relationnelles",
+    description: "<p>SQL, modèle relationnel et normalisation</p>",
     teacherId: "teacher-1",
     createdAt: new Date("2024-10-05"),
     status: "Terminé",
@@ -200,5 +262,42 @@ export const MOCK_QUIZZES: Quiz[] = [
     expiresAt: new Date("2026-06-30"),
     gradingSystem: "standard",
     questions: [],
+  },
+  {
+    id: "4",
+    title: "Réseaux",
+    description: "<p>Protocoles TCP/IP et architecture réseau</p>",
+    teacherId: "teacher-1",
+    createdAt: new Date("2024-11-01"),
+    status: "Actif",
+    durationMinutes: 45,
+    expiresAt: new Date("2026-12-31"),
+    gradingSystem: "standard",
+    questions: [
+      {
+        id: "q7",
+        text: "Quel protocole assure le transport fiable des données ?",
+        points: 1,
+        penaltyPoints: 0.25,
+        choices: [
+          { id: "c25", text: "UDP", isCorrect: false },
+          { id: "c26", text: "TCP", isCorrect: true },
+          { id: "c27", text: "ICMP", isCorrect: false },
+          { id: "c28", text: "ARP", isCorrect: false },
+        ],
+      },
+      {
+        id: "q8",
+        text: "Combien de bits contient une adresse IPv4 ?",
+        points: 1,
+        penaltyPoints: 0.25,
+        choices: [
+          { id: "c29", text: "16", isCorrect: false },
+          { id: "c30", text: "32", isCorrect: true },
+          { id: "c31", text: "64", isCorrect: false },
+          { id: "c32", text: "128", isCorrect: false },
+        ],
+      },
+    ],
   },
 ]

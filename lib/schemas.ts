@@ -9,6 +9,27 @@ export const loginSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Adresse email invalide"),
+})
+
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
+
+export const registerSchema = z
+  .object({
+    fullName: z.string().min(2, "Le nom est requis"),
+    email: z.string().email("Adresse email invalide"),
+    password: z.string().min(8, "8 caractères minimum"),
+    confirmPassword: z.string(),
+    isTeacher: z.boolean().default(false),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["confirmPassword"],
+  })
+
+export type RegisterFormValues = z.infer<typeof registerSchema>
+
 const choiceSchema = z.object({
   text: z.string().min(1, "Le choix ne peut pas être vide"),
   isCorrect: z.boolean(),

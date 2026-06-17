@@ -125,7 +125,7 @@ Plateforme de gestion et de passage de quiz éducatifs en ligne.
 ### 6.2 Création de Quiz
 - ~~Champ Code~~ **supprimé**
 - Champs : Durée, Date d'expiration, Système de notation, Nombre de questions à générer
-- Interface de sélection/affectation des étudiants (modale)
+- Interface d'**affectation des étudiants** (panneau de sélection intégré, table `Quiz_Assignment`)
 
 ### 6.3 Espace Étudiant
 - **Accueil** : quiz assignés sous forme de **cartes** (pas de saisie de code)

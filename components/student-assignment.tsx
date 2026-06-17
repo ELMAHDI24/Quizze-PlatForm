@@ -1,20 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Users, Search, UserCheck } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { MOCK_STUDENTS } from "@/lib/quiz-utils"
 
 interface StudentAssignmentProps {
@@ -28,9 +16,7 @@ export function StudentAssignment({
   onChange,
   error,
 }: StudentAssignmentProps) {
-  const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
-  const [draft, setDraft] = useState<string[]>(selectedIds)
 
   const filtered = MOCK_STUDENTS.filter(
     (s) =>
@@ -39,135 +25,73 @@ export function StudentAssignment({
   )
 
   const toggleStudent = (id: string) => {
-    setDraft((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    onChange(
+      selectedIds.includes(id)
+        ? selectedIds.filter((x) => x !== id)
+        : [...selectedIds, id]
     )
   }
 
-  const selectAll = () => setDraft(MOCK_STUDENTS.map((s) => s.id))
-  const clearAll = () => setDraft([])
-
-  const handleConfirm = () => {
-    onChange(draft)
-    setOpen(false)
-  }
-
-  const handleOpen = (isOpen: boolean) => {
-    if (isOpen) setDraft(selectedIds)
-    setOpen(isOpen)
-  }
+  const selectAll = () => onChange(MOCK_STUDENTS.map((s) => s.id))
+  const clearAll = () => onChange([])
 
   return (
-    <div className="space-y-2">
-      <Dialog open={open} onOpenChange={handleOpen}>
-        <DialogTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full justify-start gap-2 h-12 border-dashed"
+    <div className="flex h-full flex-col rounded-3xl border border-[#E8E4DC] bg-white p-5 shadow-sm md:p-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="text-base font-semibold text-[#2D2D2D]">Affecter les étudiants</h3>
+        <span className="rounded-full bg-[#E2EDE7] px-3 py-1 text-xs font-bold text-[#4DA091]">
+          {selectedIds.length} SÉLECTIONNÉ{selectedIds.length === 1 ? "" : "S"}
+        </span>
+      </div>
+
+      <div className="relative mb-4">
+        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#707070]" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher un étudiant..."
+          className="w-full rounded-xl border border-[#E8E4DC] bg-[#F9F7F2] py-3 pl-11 pr-4 text-sm text-[#2D2D2D] outline-none focus:ring-2 focus:ring-[#C46A42]/20"
+        />
+      </div>
+
+      <div className="min-h-[280px] flex-1 space-y-1 overflow-y-auto rounded-xl border border-[#F0EDE6] p-2">
+        {filtered.map((student) => (
+          <label
+            key={student.id}
+            className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-[#F9F7F2]"
           >
-            <Users className="h-4 w-4 text-[#4DA091]" />
-            {selectedIds.length > 0 ? (
-              <span>
-                <strong>{selectedIds.length}</strong> étudiant
-                {selectedIds.length > 1 ? "s" : ""} sélectionné
-                {selectedIds.length > 1 ? "s" : ""}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">
-                Affecter des étudiants au quiz
-              </span>
-            )}
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5 text-[#4DA091]" />
-              Affectation des étudiants
-            </DialogTitle>
-            <DialogDescription>
-              Sélectionnez les étudiants autorisés à passer ce quiz.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un étudiant..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
+            <Checkbox
+              checked={selectedIds.includes(student.id)}
+              onCheckedChange={() => toggleStudent(student.id)}
+              className="border-[#707070]/40 data-[state=checked]:border-[#4DA091] data-[state=checked]:bg-[#4DA091]"
+            />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-[#2D2D2D]">{student.name}</p>
+              <p className="truncate text-xs text-[#707070]">{student.email}</p>
             </div>
+          </label>
+        ))}
+      </div>
 
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={selectAll}>
-                Tout sélectionner
-              </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={clearAll}>
-                Tout désélectionner
-              </Button>
-              <Badge variant="secondary" className="ml-auto">
-                {draft.length} / {MOCK_STUDENTS.length}
-              </Badge>
-            </div>
+      <div className="mt-4 flex gap-3">
+        <button
+          type="button"
+          onClick={selectAll}
+          className="text-sm font-medium text-[#C46A42] transition-opacity hover:opacity-80"
+        >
+          Tout sélectionner
+        </button>
+        <button
+          type="button"
+          onClick={clearAll}
+          className="rounded-xl border border-[#E8E4DC] px-4 py-2 text-sm font-medium text-[#707070] transition-colors hover:bg-[#F9F7F2]"
+        >
+          Tout désélectionner
+        </button>
+      </div>
 
-            <div className="max-h-64 overflow-y-auto space-y-1 rounded-lg border p-2">
-              {filtered.map((student) => (
-                <label
-                  key={student.id}
-                  className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 hover:bg-muted/50 transition-colors"
-                >
-                  <Checkbox
-                    checked={draft.includes(student.id)}
-                    onCheckedChange={() => toggleStudent(student.id)}
-                    className="data-[state=checked]:bg-[#4DA091] data-[state=checked]:border-[#4DA091]"
-                  />
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#A8D5CC]/30 text-xs font-semibold text-[#4DA091]">
-                    {student.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{student.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {student.email}
-                    </p>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
-            </Button>
-            <Button type="button" onClick={handleConfirm}>
-              Confirmer ({draft.length})
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {selectedIds.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {selectedIds.map((id) => {
-            const student = MOCK_STUDENTS.find((s) => s.id === id)
-            if (!student) return null
-            return (
-              <Badge key={id} variant="secondary" className="text-xs">
-                {student.name}
-              </Badge>
-            )
-          })}
-        </div>
-      )}
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
     </div>
   )
 }

@@ -1,34 +1,29 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react"
+import { Playfair_Display } from "next/font/google"
+import { BookOpen, Calendar, Clock, Save } from "lucide-react"
 import { quizCreationSchema, type QuizCreationFormValues } from "@/lib/schemas"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
+import { Slider } from "@/components/ui/slider"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { StudentAssignment } from "@/components/student-assignment"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["700"],
+})
 
 const defaultChoice = () => ({ text: "", isCorrect: false })
 
@@ -50,16 +45,17 @@ export default function NewQuizPage() {
     defaultValues: {
       title: "",
       description: "",
-      durationMinutes: 30,
+      durationMinutes: 45,
       expiresAt: "",
       gradingSystem: "standard",
-      questionCount: 1,
+      questionCount: 5,
       assignedStudentIds: [],
-      questions: [defaultQuestion()],
+      questions: Array.from({ length: 5 }, () => defaultQuestion()),
     },
   })
 
   const questionCount = form.watch("questionCount")
+  const gradingSystem = form.watch("gradingSystem")
   const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "questions",
@@ -89,119 +85,175 @@ export default function NewQuizPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto w-full space-y-8">
-      <div className="flex items-center gap-4 mb-2">
-        <Link href="/teacher">
-          <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Créer un nouveau quiz</h1>
-          <p className="text-slate-500 mt-1">
-            Affectation directe des étudiants — sans code d&apos;accès.
+    <div className="flex-1 bg-[#F9F7F2] px-6 py-8 md:px-10 md:py-10">
+      <div className="mx-auto max-w-6xl space-y-8">
+        <header>
+          <h1 className={`${playfair.className} text-3xl font-bold text-[#2D2D2D] md:text-4xl`}>
+            Créer un nouveau quiz
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-[#707070]">
+            Définissez les paramètres, puis affectez les étudiants concernés — aucun code à
+            générer.
           </p>
-        </div>
-      </div>
+        </header>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <Card className="border-none shadow-sm bg-white">
-            <CardHeader>
-              <CardTitle className="text-xl text-slate-800">Informations Générales</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titre du Quiz</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Évaluation de mi-trimestre - Histoire" className="h-12" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <RichTextEditor value={field.value} onChange={field.onChange} placeholder="Description du quiz..." />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+              <div className="space-y-5 rounded-3xl border border-[#E8E4DC] bg-white p-5 shadow-sm md:p-6">
                 <FormField
                   control={form.control}
-                  name="durationMinutes"
+                  name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Durée totale (minutes)</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-[#2D2D2D]">
+                        Titre du quiz
+                      </FormLabel>
                       <FormControl>
-                        <Input type="number" min={5} max={180} className="h-12" {...field} />
+                        <div className="relative">
+                          <BookOpen className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#707070]" />
+                          <input
+                            {...field}
+                            type="text"
+                            placeholder="Ex : Algorithmique — Structures de données"
+                            className="w-full rounded-xl border border-[#E8E4DC] bg-[#F9F7F2] py-3.5 pl-12 pr-4 text-sm text-[#2D2D2D] outline-none focus:ring-2 focus:ring-[#C46A42]/20"
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="expiresAt"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date d&apos;expiration</FormLabel>
-                      <FormControl>
-                        <Input type="datetime-local" className="h-12" {...field} />
-                      </FormControl>
-                      <FormDescription>RG-10 : passage auto Actif → Terminé</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="durationMinutes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#2D2D2D]">
+                          Durée totale (minutes)
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Clock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#707070]" />
+                            <input
+                              {...field}
+                              type="number"
+                              min={5}
+                              max={180}
+                              className="w-full rounded-xl border border-[#E8E4DC] bg-[#F9F7F2] py-3.5 pl-12 pr-4 text-sm text-[#2D2D2D] outline-none focus:ring-2 focus:ring-[#C46A42]/20"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="expiresAt"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-semibold text-[#2D2D2D]">
+                          Date d&apos;expiration
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Calendar className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#707070]" />
+                            <input
+                              {...field}
+                              type="datetime-local"
+                              className="w-full rounded-xl border border-[#E8E4DC] bg-[#F9F7F2] py-3.5 pl-12 pr-4 text-sm text-[#2D2D2D] outline-none focus:ring-2 focus:ring-[#C46A42]/20"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="gradingSystem"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Système de notation</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="h-12">
-                            <SelectValue placeholder="Choisir le système" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="standard">Standard</SelectItem>
-                          <SelectItem value="canadien">Canadien (pénalités)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>RG-11 : le mode Canadien applique des points négatifs</FormDescription>
+                      <FormLabel className="text-sm font-semibold text-[#2D2D2D]">
+                        Système de notation
+                      </FormLabel>
+                      <div className="flex items-center justify-between rounded-full bg-[#EDE8DF] px-5 py-3">
+                        <button
+                          type="button"
+                          onClick={() => field.onChange("standard")}
+                          className={`text-sm transition-colors ${
+                            field.value === "standard"
+                              ? "font-bold text-[#2D2D2D]"
+                              : "font-medium text-[#707070]"
+                          }`}
+                        >
+                          Standard
+                        </button>
+                        <Switch
+                          checked={field.value === "canadien"}
+                          onCheckedChange={(checked) =>
+                            field.onChange(checked ? "canadien" : "standard")
+                          }
+                          className="h-6 w-11 shrink-0 border-0 bg-[#4DA091] data-[state=checked]:bg-[#C46A42] data-[state=unchecked]:bg-[#4DA091] [&>span]:size-5 [&>span]:bg-white [&>span]:data-[state=checked]:translate-x-5 [&>span]:data-[state=unchecked]:translate-x-0.5"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => field.onChange("canadien")}
+                          className={`text-sm transition-colors ${
+                            field.value === "canadien"
+                              ? "font-bold text-[#2D2D2D]"
+                              : "font-medium text-[#707070]"
+                          }`}
+                        >
+                          Canadien (pénalités)
+                        </button>
+                      </div>
+                      {gradingSystem === "canadien" && (
+                        <p className="rounded-xl bg-[#FDECEC] px-4 py-3 text-xs text-[#C46A42]">
+                          Le système canadien applique des points négatifs pour chaque mauvaise
+                          réponse.
+                        </p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="questionCount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre de questions à générer</FormLabel>
-                      <FormControl>
-                        <Input type="number" min={1} max={50} className="h-12" {...field} />
-                      </FormControl>
-                      <FormDescription>Génère N questions vides d&apos;un coup</FormDescription>
+                      <FormLabel className="text-sm font-semibold text-[#2D2D2D]">
+                        Nombre de questions à générer
+                      </FormLabel>
+                      <div className="flex items-center gap-4">
+                        <FormControl>
+                          <Slider
+                            min={1}
+                            max={20}
+                            step={1}
+                            value={[Number(field.value) || 1]}
+                            onValueChange={(value) => field.onChange(value[0])}
+                            className="flex-1 [&_[data-slot=slider-range]]:bg-[#C46A42] [&_[data-slot=slider-thumb]]:size-5 [&_[data-slot=slider-thumb]]:border-[#C46A42] [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-track]]:bg-[#E8E4DC]"
+                          />
+                        </FormControl>
+                        <span className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-[#2D2D2D] px-3 text-sm font-bold text-white">
+                          {field.value}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#707070]">
+                        {field.value} question{Number(field.value) > 1 ? "s" : ""} vide
+                        {Number(field.value) > 1 ? "s" : ""} seront générée
+                        {Number(field.value) > 1 ? "s" : ""} — la publication sera bloquée
+                        jusqu&apos;à ce qu&apos;elles soient toutes complétées.
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -212,106 +264,100 @@ export default function NewQuizPage() {
                 control={form.control}
                 name="assignedStudentIds"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Affectation nominative des étudiants</FormLabel>
+                  <FormItem className="h-full">
                     <FormControl>
-                      <StudentAssignment selectedIds={field.value} onChange={field.onChange} />
+                      <StudentAssignment
+                        selectedIds={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </CardContent>
-          </Card>
-
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-slate-800">Questions ({fields.length})</h2>
-              <Button
-                type="button"
-                variant="outline"
-                className="gap-2"
-                onClick={() => {
-                  append(defaultQuestion())
-                  form.setValue("questionCount", fields.length + 1)
-                }}
-              >
-                <Plus className="h-4 w-4" /> Ajouter une question
-              </Button>
             </div>
 
-            {fields.map((field, qIndex) => (
-              <Card key={field.id} className="border-slate-200 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-primary/60" />
-                <CardHeader className="pb-4 flex flex-row items-start justify-between">
-                  <div className="w-full pr-4 space-y-2">
-                    <FormLabel>Question {qIndex + 1}</FormLabel>
+            <section className="rounded-3xl border border-[#E8E4DC] bg-white p-5 shadow-sm md:p-6">
+              <h2 className="mb-6 text-lg font-semibold text-[#2D2D2D]">
+                Questions générées ({fields.length})
+              </h2>
+
+              <div className="space-y-6">
+                {fields.map((field, qIndex) => (
+                  <div
+                    key={field.id}
+                    className="rounded-2xl border border-[#F0EDE6] bg-[#FBFAF7] p-4 md:p-5"
+                  >
+                    <p className="mb-3 text-sm font-semibold text-[#2D2D2D]">
+                      Question {qIndex + 1}
+                    </p>
                     <FormField
                       control={form.control}
                       name={`questions.${qIndex}.text`}
                       render={({ field: qField }) => (
-                        <FormItem>
+                        <FormItem className="mb-4">
                           <FormControl>
-                            <RichTextEditor value={qField.value} onChange={qField.onChange} placeholder="Énoncé..." />
+                            <RichTextEditor
+                              value={qField.value}
+                              onChange={qField.onChange}
+                              placeholder="Énoncé de la question..."
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </div>
-                  {fields.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        remove(qIndex)
-                        form.setValue("questionCount", fields.length - 1)
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3">
-                    {[0, 1, 2, 3].map((cIndex) => (
-                      <div key={cIndex} className="flex items-center gap-3">
-                        <span className="w-8 h-8 flex items-center justify-center rounded-full border text-sm font-medium">
-                          {String.fromCharCode(65 + cIndex)}
-                        </span>
-                        <FormField
-                          control={form.control}
-                          name={`questions.${qIndex}.choices.${cIndex}.text`}
-                          render={({ field: cField }) => (
-                            <FormItem className="flex-1">
-                              <FormControl>
-                                <Input placeholder={`Option ${cIndex + 1}`} {...cField} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Checkbox
-                          checked={form.watch(`questions.${qIndex}.choices.${cIndex}.isCorrect`)}
-                          onCheckedChange={() => setCorrectChoice(qIndex, cIndex)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
 
-          <div className="flex justify-end pt-6 border-t">
-            <Button type="submit" size="lg" className="gap-2">
-              <Save className="h-5 w-5" />
-              Publier le quiz
-            </Button>
-          </div>
-        </form>
-      </Form>
+                    <div className="grid gap-2">
+                      {[0, 1, 2, 3].map((cIndex) => (
+                        <div key={cIndex} className="flex items-center gap-3">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F0EDE6] text-sm font-semibold text-[#707070]">
+                            {String.fromCharCode(65 + cIndex)}
+                          </span>
+                          <FormField
+                            control={form.control}
+                            name={`questions.${qIndex}.choices.${cIndex}.text`}
+                            render={({ field: cField }) => (
+                              <FormItem className="flex-1">
+                                <FormControl>
+                                  <input
+                                    {...cField}
+                                    placeholder={`Option ${cIndex + 1}`}
+                                    className="w-full rounded-xl border border-[#E8E4DC] bg-white px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#C46A42]/20"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <input
+                            type="radio"
+                            name={`correct-${qIndex}`}
+                            checked={form.watch(`questions.${qIndex}.choices.${cIndex}.isCorrect`)}
+                            onChange={() => setCorrectChoice(qIndex, cIndex)}
+                            className="h-4 w-4 accent-[#C46A42]"
+                            aria-label={`Bonne réponse ${String.fromCharCode(65 + cIndex)}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 rounded-full bg-[#C46A42] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
+              >
+                <Save className="h-4 w-4" />
+                Publier le quiz
+              </button>
+            </div>
+          </form>
+        </Form>
+      </div>
     </div>
   )
 }

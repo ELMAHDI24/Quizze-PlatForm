@@ -1,45 +1,102 @@
+"use client"
+
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, KeyRound } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Playfair_Display } from "next/font/google"
+import { Mail, ArrowLeft } from "lucide-react"
+import { forgotPasswordSchema, type ForgotPasswordFormValues } from "@/lib/schemas"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["700"],
+})
 
 export default function ForgotPasswordPage() {
+  const form = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: "" },
+  })
+
+  const onSubmit = () => {
+    // Simulation — envoi du lien de réinitialisation
+  }
+
   return (
-    <div className="flex-1 flex items-center justify-center p-4 bg-slate-50/50">
-      <Card className="w-full max-w-md shadow-xl border-slate-100 text-center">
-        <CardHeader className="space-y-4 pb-6">
-          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-            <KeyRound className="h-6 w-6 text-primary" />
+    <div className="relative min-h-screen bg-[#F9F7F2]">
+      <div className="absolute right-6 top-6 lg:right-10 lg:top-8">
+        <Link
+          href="/auth"
+          className="flex items-center gap-2 text-sm font-medium text-[#2D2D2D] transition-colors hover:text-[#A65E3E]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour à la connexion
+        </Link>
+      </div>
+
+      <div className="flex min-h-screen items-center justify-center px-4 py-20">
+        <div className="w-full max-w-md">
+          <div className="mb-8 text-center">
+            <h1 className={`${playfair.className} text-3xl font-bold text-[#2D2D2D] md:text-4xl`}>
+              Mot de passe oublié
+            </h1>
+            <p className="mt-4 text-sm leading-relaxed text-[#707070] md:text-base">
+              Saisissez l&apos;adresse e-mail associée à votre compte. Vous recevrez un lien
+              pour créer un nouveau mot de passe.
+            </p>
           </div>
-          <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold text-slate-800">Mot de passe oublié</CardTitle>
-            <CardDescription className="text-slate-500 max-w-[90%] mx-auto">
-              Entrez votre adresse email, nous vous enverrons un lien pour réinitialiser votre mot de passe.
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4 text-left">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-600">Adresse email</Label>
-              <Input id="email" type="email" placeholder="votre@email.fr" className="bg-slate-50/50 border-slate-200 focus-visible:ring-primary/20" />
-            </div>
-            <Link href="/auth" className="block pt-2">
-              <Button className="w-full bg-primary hover:bg-primary/90 text-white shadow-md">
-                Envoyer le lien
-              </Button>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold text-[#2D2D2D]">
+                      Adresse e-mail
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#707070]" />
+                        <input
+                          {...field}
+                          type="email"
+                          placeholder="vous@etablissement.ma"
+                          className="w-full rounded-xl border border-[#707070]/25 bg-white py-3.5 pl-12 pr-4 text-[#2D2D2D] placeholder:text-[#707070]/50 outline-none transition-shadow focus:ring-2 focus:ring-[#A65E3E]/20"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-[#D6CDBA] py-3.5 text-base font-semibold text-[#2D2D2D] transition-opacity hover:opacity-90"
+              >
+                Envoyer le lien de réinitialisation
+              </button>
+            </form>
+          </Form>
+
+          <p className="mt-8 text-center text-sm text-[#707070]">
+            Vous vous souvenez de votre mot de passe ?{" "}
+            <Link href="/auth" className="font-semibold text-[#A65E3E] hover:underline">
+              Se connecter
             </Link>
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4 border-t border-slate-100 pt-6">
-          <Link href="/auth" className="flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors font-medium">
-            <ArrowLeft className="h-4 w-4" />
-            Retour à la connexion
-          </Link>
-        </CardFooter>
-      </Card>
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
