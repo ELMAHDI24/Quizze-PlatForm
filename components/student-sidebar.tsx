@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { BarChart3, LogOut } from "lucide-react"
+import { ClipboardList, LogOut, Trophy } from "lucide-react"
 import { CURRENT_STUDENT } from "@/lib/quiz-utils"
 
 function AppLogo({ className }: { className?: string }) {
@@ -30,7 +30,8 @@ export function StudentSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const isQuizSession = pathname.startsWith("/student/quiz/")
-  const isQuizzesActive = pathname === "/student" || isQuizSession
+  const isQuizzesActive = pathname === "/student"
+  const isResultsActive = pathname.startsWith("/student/results")
 
   if (isQuizSession) return null
 
@@ -66,8 +67,20 @@ export function StudentSidebar() {
               : "text-[#707070] hover:bg-[#E2EDE7]/50 hover:text-[#2D2D2D]"
           }`}
         >
-          <BarChart3 className={`h-5 w-5 ${isQuizzesActive ? "text-[#4DA091]" : "text-[#707070]"}`} />
+          <ClipboardList className={`h-5 w-5 ${isQuizzesActive ? "text-[#4DA091]" : "text-[#707070]"}`} />
           Mes quiz
+        </Link>
+
+        <Link
+          href="/student/results"
+          className={`mt-1 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+            isResultsActive
+              ? "bg-[#E2EDE7] text-[#2D2D2D]"
+              : "text-[#707070] hover:bg-[#E2EDE7]/50 hover:text-[#2D2D2D]"
+          }`}
+        >
+          <Trophy className={`h-5 w-5 ${isResultsActive ? "text-[#4DA091]" : "text-[#707070]"}`} />
+          Mes résultats
         </Link>
       </nav>
 

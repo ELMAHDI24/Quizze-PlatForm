@@ -90,8 +90,71 @@ export const CURRENT_STUDENT = {
   initials: "ÉT",
 }
 
-export const MOCK_STUDENT_SCORES: Record<string, { score: number; maxScore: number }> = {
-  "2": { score: 14.5, maxScore: 20 },
+export const MOCK_STUDENT_SCORES: Record<
+  string,
+  { score: number; maxScore: number; date?: string }
+> = {
+  "2": { score: 14.5, maxScore: 20, date: "1 nov. 2024 — 14:32" },
+}
+
+export interface StudentQuizResult {
+  quizId: string
+  quizTitle: string
+  score: number
+  total: number
+  date: string
+  gradingSystem: GradingSystem
+  status: QuizResultStatus
+}
+
+/** Résultats des quiz terminés pour un étudiant donné */
+export function getStudentQuizResults(studentId: string): StudentQuizResult[] {
+  const student = MOCK_STUDENTS.find((s) => s.id === studentId)
+  const studentName = student?.name ?? CURRENT_STUDENT.name
+
+  const assignedQuizIds = MOCK_ASSIGNMENTS.filter((a) => a.userId === studentId).map(
+    (a) => a.quizId
+  )
+
+  const results: StudentQuizResult[] = []
+
+  for (const quizId of assignedQuizIds) {
+    const quiz = MOCK_QUIZZES.find((q) => q.id === quizId)
+    if (!quiz) continue
+
+    const resolvedStatus = resolveQuizStatus(quiz)
+    const row = (MOCK_QUIZ_RESULTS[quizId] ?? []).find(
+      (r) => r.name === studentName || r.email === student?.email
+    )
+
+    if (row) {
+      results.push({
+        quizId,
+        quizTitle: quiz.title,
+        score: row.score,
+        total: row.total,
+        date: row.date,
+        gradingSystem: quiz.gradingSystem,
+        status: getQuizResultStatus(row.score),
+      })
+      continue
+    }
+
+    const mockScore = MOCK_STUDENT_SCORES[quizId]
+    if (mockScore && isQuizInactive(resolvedStatus)) {
+      results.push({
+        quizId,
+        quizTitle: quiz.title,
+        score: mockScore.score,
+        total: mockScore.maxScore,
+        date: mockScore.date ?? "—",
+        gradingSystem: quiz.gradingSystem,
+        status: getQuizResultStatus(mockScore.score),
+      })
+    }
+  }
+
+  return results.sort((a, b) => b.score - a.score)
 }
 
 export const TEACHER_QUIZ_ASSIGNED_COUNTS: Record<string, number> = {

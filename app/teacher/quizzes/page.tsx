@@ -7,6 +7,7 @@ import {
   Calendar,
   Clock,
   Pencil,
+  PlusCircle,
   Trash2,
   Trophy,
   Users,
@@ -87,6 +88,15 @@ export default function TeacherQuizzesPage() {
                       aria-label="Voir les résultats"
                     >
                       <Trophy className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      href={`/teacher/quiz/${quiz.id}/add-question`}
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg border border-[#E8E4DC] text-[#707070] transition-colors hover:border-[#C46A42]/40 hover:text-[#C46A42] ${
+                        inactive ? "pointer-events-none opacity-40" : ""
+                      }`}
+                      aria-label="Ajouter une question"
+                    >
+                      <PlusCircle className="h-4 w-4" />
                     </Link>
                     <button
                       type="button"

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Playfair_Display } from "next/font/google"
 import { ArrowRight, BookOpen, Clock, FileText } from "lucide-react"
@@ -90,6 +91,14 @@ function CompletedQuizCard({ quiz }: { quiz: Quiz }) {
           {score}/{maxScore}
         </span>
       </div>
+
+      <Link
+        href={`/student/results/${quiz.id}`}
+        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-[#E8E4DC] bg-white py-3 text-sm font-semibold text-[#4DA091] transition-colors hover:bg-[#E2EDE7]/40"
+      >
+        Voir le résultat
+        <ArrowRight className="h-4 w-4" />
+      </Link>
     </article>
   )
 }

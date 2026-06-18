@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { Playfair_Display } from "next/font/google"
-import { Trophy, Clock, Users, FileText } from "lucide-react"
+import { PlusCircle, Trophy, Clock, Users, FileText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { getQuizCardClassName, MOCK_ASSIGNMENTS, MOCK_QUIZZES, MOCK_STUDENT_SCORES } from "@/lib/quiz-utils"
+import { getQuizCardClassName, MOCK_ASSIGNMENTS, MOCK_QUIZZES, MOCK_STUDENT_SCORES, resolveQuizStatus, isQuizInactive } from "@/lib/quiz-utils"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -82,6 +82,8 @@ export default function TeacherDashboard() {
             {quizzes.map((quiz) => {
               const assignmentCount = countAssignedStudents(quiz.id)
               const bestScore = BEST_SCORES[quiz.id]?.label
+              const resolvedStatus = resolveQuizStatus(quiz)
+              const inactive = isQuizInactive(resolvedStatus)
 
               return (
                 <article
@@ -136,6 +138,25 @@ export default function TeacherDashboard() {
                         )}
                       </div>
                     </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 border-t border-[#F0EDE6] pt-4">
+                    <Link
+                      href={`/teacher/quiz/${quiz.id}/results`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#E8E4DC] bg-white px-4 py-2 text-xs font-semibold text-[#707070] transition-colors hover:border-[#C46A42]/40 hover:text-[#C46A42]"
+                    >
+                      <Trophy className="h-3.5 w-3.5" />
+                      Résultats
+                    </Link>
+                    <Link
+                      href={`/teacher/quiz/${quiz.id}/add-question`}
+                      className={`inline-flex items-center gap-1.5 rounded-full border border-[#E8E4DC] bg-white px-4 py-2 text-xs font-semibold text-[#707070] transition-colors hover:border-[#C46A42]/40 hover:text-[#C46A42] ${
+                        inactive ? "pointer-events-none opacity-40" : ""
+                      }`}
+                    >
+                      <PlusCircle className="h-3.5 w-3.5" />
+                      Ajouter une question
+                    </Link>
                   </div>
                 </article>
               )

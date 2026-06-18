@@ -1,119 +1,140 @@
+"use client"
+
 import Link from "next/link"
-import { ArrowLeft, Award, Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+import { Playfair_Display } from "next/font/google"
+import { ArrowRight, BarChart3, Calendar, Trophy } from "lucide-react"
+import {
+  CURRENT_STUDENT_ID,
+  getQuizResultStatusLabel,
+  getStudentQuizResults,
+} from "@/lib/quiz-utils"
+import type { QuizResultStatus } from "@/lib/quiz-utils"
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["700"],
+})
+
+function getStatusBadgeClass(status: QuizResultStatus) {
+  if (status === "valide") return "bg-[#E2EDE7] text-[#4DA091]"
+  if (status === "rattrapage") return "bg-[#F4E1D5] text-[#C46A42]"
+  return "bg-[#FDECEC] text-[#D32F2F]"
+}
 
 export default function StudentResultsPage() {
-  const pastResults = [
-    { id: 1, quizName: "Mathématiques - Chapitre 4", date: "14 Oct 2024", score: 14, total: 20 },
-    { id: 2, quizName: "Histoire - La Révolution", date: "05 Oct 2024", score: 17, total: 20 },
-    { id: 3, quizName: "Physique - Mécanique", date: "28 Sep 2024", score: 9, total: 20 },
-    { id: 4, quizName: "Anglais - Vocabulaire", date: "15 Sep 2024", score: 19, total: 20 },
-  ]
+  const results = getStudentQuizResults(CURRENT_STUDENT_ID)
+  const average =
+    results.length > 0
+      ? results.reduce((acc, r) => acc + (r.score / r.total) * 20, 0) / results.length
+      : 0
+  const validatedCount = results.filter((r) => r.status === "valide").length
 
   return (
-    <div className="p-8 max-w-4xl mx-auto w-full space-y-8">
-      <div className="flex items-center gap-4 mb-2">
-        <Link href="/student">
-          <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Historique des Résultats</h1>
-          <p className="text-slate-500 mt-1">Consultez vos notes précédentes (Mes Notes).</p>
-        </div>
-      </div>
+    <div className="flex-1 px-6 py-8 md:px-10 md:py-10 lg:px-12">
+      <header className="mb-10">
+        <h1 className={`${playfair.className} text-3xl font-bold text-[#2D2D2D] md:text-4xl`}>
+          Mes résultats
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-[#707070] md:text-base">
+          Consultez vos notes et statuts pour les quiz que vous avez terminés.
+        </p>
+      </header>
 
-      <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
-        <CardHeader className="border-b border-slate-100 bg-slate-50/30 pb-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-primary" />
-                <CardTitle className="text-xl">Tous vos quiz passés</CardTitle>
+      {results.length > 0 && (
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[
+            { label: "Quiz terminés", value: String(results.length), icon: BarChart3 },
+            { label: "Moyenne générale", value: `${average.toFixed(1)}/20`, icon: Trophy },
+            {
+              label: "Quiz validés (≥10)",
+              value: `${validatedCount}/${results.length}`,
+              icon: Trophy,
+            },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="flex items-center gap-4 rounded-2xl border border-[#E8E4DC] bg-white p-5 shadow-sm"
+            >
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E2EDE7]">
+                <stat.icon className="h-5 w-5 text-[#4DA091]" />
               </div>
-              <CardDescription className="mt-1">Liste de toutes vos évaluations et de vos notes finales</CardDescription>
+              <div>
+                <p className="text-xs text-[#707070]">{stat.label}</p>
+                <p className={`${playfair.className} text-2xl font-bold text-[#2D2D2D]`}>
+                  {stat.value}
+                </p>
+              </div>
             </div>
-          </div>
-          
-          {/* Filters and Search */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-1">
-            <div className="relative w-full sm:max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input placeholder="Rechercher une matière ou un quiz..." className="pl-9 bg-slate-50/50" />
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Select defaultValue="tous">
-                <SelectTrigger className="w-[150px] bg-slate-50/50">
-                  <SelectValue placeholder="Période" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tous">Toutes les dates</SelectItem>
-                  <SelectItem value="30jours">30 derniers jours</SelectItem>
-                  <SelectItem value="3mois">3 derniers mois</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-        
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                <TableHead className="font-semibold text-slate-700">Nom du Quiz</TableHead>
-                <TableHead className="font-semibold text-slate-700">Date de passage</TableHead>
-                <TableHead className="font-semibold text-slate-700 text-center">Statut</TableHead>
-                <TableHead className="text-right font-semibold text-slate-700">Note Finale</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pastResults.map((result) => (
-                <TableRow key={result.id} className="hover:bg-slate-50/50 transition-colors">
-                  <TableCell className="font-medium text-slate-900">{result.quizName}</TableCell>
-                  <TableCell className="text-slate-600">{result.date}</TableCell>
-                  <TableCell className="text-center">
-                    {result.score >= 10 ? (
-                      <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-none">Réussi</Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800 hover:bg-red-100 border-none">Non acquis</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <span className={`font-bold text-lg ${result.score >= 10 ? 'text-green-600' : 'text-red-600'}`}>
-                      {result.score}
-                    </span>
-                    <span className="text-slate-400">/{result.total}</span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          ))}
         </div>
-        
-        {/* Pagination */}
-        <div className="p-4 border-t border-slate-100">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#" />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#" isActive>1</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+      )}
+
+      {results.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[#E8E4DC] bg-white/60 px-6 py-16 text-center text-[#707070]">
+          Aucun résultat disponible pour le moment. Terminez un quiz pour voir votre note ici.
         </div>
-      </Card>
+      ) : (
+        <section className="overflow-hidden rounded-2xl border border-[#E8E4DC] bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px]">
+              <thead>
+                <tr className="border-b border-[#E8E4DC] bg-[#FBFAF7] text-left text-xs font-semibold uppercase tracking-wide text-[#707070]">
+                  <th className="px-6 py-4">Quiz</th>
+                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Statut</th>
+                  <th className="px-6 py-4 text-right">Note</th>
+                  <th className="px-6 py-4 text-right">Détail</th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((result) => (
+                  <tr key={result.quizId} className="border-b border-[#F0EDE6] last:border-b-0">
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-[#2D2D2D]">{result.quizTitle}</p>
+                      <p className="text-xs text-[#707070]">
+                        {result.gradingSystem === "canadien"
+                          ? "Notation canadienne"
+                          : "Notation standard"}
+                      </p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="flex items-center gap-1.5 text-sm text-[#707070]">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {result.date}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${getStatusBadgeClass(result.status)}`}
+                      >
+                        {getQuizResultStatusLabel(result.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span
+                        className={`text-base font-bold ${
+                          result.status === "non_valide" ? "text-[#D32F2F]" : "text-[#2D2D2D]"
+                        }`}
+                      >
+                        {result.score}/{result.total}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link
+                        href={`/student/results/${result.quizId}`}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-[#4DA091] transition-opacity hover:opacity-80"
+                      >
+                        Voir
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

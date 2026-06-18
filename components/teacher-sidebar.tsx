@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { BarChart3, ClipboardList, LayoutDashboard, LogOut, PlusCircle } from "lucide-react"
+import { BarChart3, ClipboardList, LayoutDashboard, ListPlus, LogOut, PlusCircle } from "lucide-react"
 
 export function TeacherSidebar() {
   const pathname = usePathname()
@@ -12,6 +12,8 @@ export function TeacherSidebar() {
   const isQuizzesActive = pathname === "/teacher/quizzes"
   const isResultsActive = pathname.includes("/results")
   const isCreateQuizActive = pathname === "/teacher/quiz/new"
+  const isAddQuestionActive =
+    pathname === "/teacher/add-question" || pathname.includes("/add-question")
 
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-[#E8E4DC] bg-[#F9F7F2] md:flex">
@@ -80,6 +82,20 @@ export function TeacherSidebar() {
             className={`h-5 w-5 ${isCreateQuizActive ? "text-[#C46A42]" : "text-white"}`}
           />
           Créer un quiz
+        </Link>
+
+        <Link
+          href="/teacher/add-question"
+          className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+            isAddQuestionActive
+              ? "bg-[#F4E1D5] text-[#2D2D2D]"
+              : "text-[#707070] hover:bg-[#F4E1D5]/60 hover:text-[#2D2D2D]"
+          }`}
+        >
+          <ListPlus
+            className={`h-5 w-5 ${isAddQuestionActive ? "text-[#C46A42]" : "text-[#B3A89A]"}`}
+          />
+          Ajouter une question
         </Link>
       </nav>
 

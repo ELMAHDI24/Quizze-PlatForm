@@ -82,6 +82,16 @@ export const quizCreationSchema = z.object({
 
 export type QuizCreationFormValues = z.infer<typeof quizCreationSchema>
 
+export const addQuestionSchema = questionSchema.extend({
+  points: z.coerce.number().min(0.25, "Minimum 0,25 point").max(20, "Maximum 20 points"),
+  penaltyPoints: z.coerce
+    .number()
+    .min(0, "La pénalité ne peut pas être négative")
+    .max(5, "Maximum 5 points de pénalité"),
+})
+
+export type AddQuestionFormValues = z.infer<typeof addQuestionSchema>
+
 export const quizAnswerSchema = z
   .object({
     selectedChoiceIndex: z.number().min(0).nullable(),
